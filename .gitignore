@@ -361,3 +361,13 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+/WorkerDemo/appsettings.Development.json
+/WorkerDemo/appsettings.json
+/WorkerDemo/Core/IMqService.cs
+/WorkerDemo/Core/Model/MqSettings.cs
+/WorkerDemo/Program.cs
+/WorkerDemo/Properties/launchSettings.json
+/WorkerDemo/Worker.cs
+/WorkerDemo/Worker1.cs
+/WorkerDemo/Worker2.cs
+/WorkerDemo/WorkerDemo.csproj
