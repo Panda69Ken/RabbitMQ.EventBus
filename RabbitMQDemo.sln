@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.13.35931.197
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RabbitMQDemo", "RabbitMQDemo\RabbitMQDemo\RabbitMQDemo.csproj", "{4C182164-8E7A-43D3-87BB-57984AFB3161}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RabbitMQDemo", "RabbitMQDemo\RabbitMQDemo.csproj", "{4C182164-8E7A-43D3-87BB-57984AFB3161}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RabbitMQ.EventBus", "RabbitMQ.EventBus\RabbitMQ.EventBus.csproj", "{1D02131C-C1C5-419E-A291-C11D89088DDC}"
 EndProject

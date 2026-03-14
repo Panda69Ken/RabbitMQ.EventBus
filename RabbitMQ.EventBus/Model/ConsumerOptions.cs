@@ -19,16 +19,23 @@
         /// </summary>
         public string DeadLetterQueue { get; init; } = string.Empty;
 
-        ///// <summary>
-        ///// 消息最大重试次数（超过后投递到 DLX）
-        ///// 最大重试次数（超过后视为失败并投递到死信交换机）
-        ///// </summary>
-        //public IReadOnlyList<RetryLevel> RetryLevels { get; init; } = [
-        //    //new RetryLevel("retry.5s", TimeSpan.FromSeconds(5)),
-        //    //new RetryLevel("retry.10s",  TimeSpan.FromSeconds(10)),
-        //    //new RetryLevel("retry.15s", TimeSpan.FromSeconds(15)),
-        //    //new RetryLevel("retry.20s", TimeSpan.FromSeconds(20)),
-        //    //new RetryLevel("retry.30s", TimeSpan.FromSeconds(30))
-        // ];
+        /// <summary>
+        /// 消息最大重试次数（超过后投递到 DLX）
+        /// 最大重试次数（超过后视为失败并投递到死信交换机）
+        /// </summary>
+        public IReadOnlyList<RetryLevel> RetryLevels { get; init; } = [
+            new RetryLevel("retry.5s", TimeSpan.FromSeconds(5)),
+            new RetryLevel("retry.10s",  TimeSpan.FromSeconds(10)),
+            new RetryLevel("retry.15s", TimeSpan.FromSeconds(15)),
+            new RetryLevel("retry.20s", TimeSpan.FromSeconds(20)),
+            new RetryLevel("retry.30s", TimeSpan.FromSeconds(30))
+         ];
     }
+
+    public class RetryLevel(string queue, TimeSpan handlerTimeout)
+    {
+        public string Queue { get; set; } = queue;
+        public TimeSpan HandlerTimeout { get; set; } = handlerTimeout;
+    }
+
 }
