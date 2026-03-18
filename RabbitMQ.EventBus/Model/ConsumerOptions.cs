@@ -20,22 +20,33 @@
         public string DeadLetterQueue { get; init; } = string.Empty;
 
         /// <summary>
-        /// 消息最大重试次数（超过后投递到 DLX）
-        /// 最大重试次数（超过后视为失败并投递到死信交换机）
+        /// 重试交换机名（可选，默认用主exchange）
         /// </summary>
-        public IReadOnlyList<RetryLevel> RetryLevels { get; init; } = [
-            new RetryLevel("retry.5s", TimeSpan.FromSeconds(5)),
-            new RetryLevel("retry.10s",  TimeSpan.FromSeconds(10)),
-            new RetryLevel("retry.15s", TimeSpan.FromSeconds(15)),
-            new RetryLevel("retry.20s", TimeSpan.FromSeconds(20)),
-            new RetryLevel("retry.30s", TimeSpan.FromSeconds(30))
-         ];
+        public string? RetryExchange { get; set; }
+        /// <summary>
+        /// 消息最大重试次数与各级重试配置
+        /// </summary>
+        public IReadOnlyList<RetryLevel> RetryLevels { get; init; } = [];
     }
 
-    public class RetryLevel(string queue, TimeSpan handlerTimeout)
+    /// <summary>
+    /// 重试配置
+    /// </summary>
+    public class RetryLevel
     {
-        public string Queue { get; set; } = queue;
-        public TimeSpan HandlerTimeout { get; set; } = handlerTimeout;
-    }
+        /// <summary>
+        /// 第几次重试（从1开始）
+        /// </summary>
+        public int RetryCount { get; set; }
 
+        /// <summary>
+        /// 重试延迟
+        /// </summary>
+        public TimeSpan Delay { get; set; }
+
+        /// <summary>
+        /// 重试队列名（可选，默认自动生成）
+        /// </summary>
+        public string? QueueName { get; set; }
+    }
 }

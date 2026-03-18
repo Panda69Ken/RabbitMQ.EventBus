@@ -25,7 +25,14 @@ namespace RabbitMQDemo
                 RoutingKeys = ["order.created"],
                 PrefetchCount = 10,
                 HandlerTimeout = TimeSpan.FromSeconds(5),
-                DeadLetterExchange = "order.dlx.exchange"
+                DeadLetterExchange = "order.dlx.exchange",
+                RetryLevels = [
+                    new() { RetryCount = 1, Delay = TimeSpan.FromSeconds(5) }
+                    //new() { RetryCount = 2, Delay = TimeSpan.FromSeconds(30) },
+                    //new() { RetryCount = 3, Delay = TimeSpan.FromMinutes(2) },
+                    //new() { RetryCount = 4, Delay = TimeSpan.FromMinutes(10) },
+                    //new() { RetryCount = 5, Delay = TimeSpan.FromMinutes(30) }
+                ]
             },
             async (msg, ct) =>
             {
@@ -36,7 +43,8 @@ namespace RabbitMQDemo
                 {
                     _logger.LogWarning($"MQ1-->EventType: {msg.EventType},Payload:{JsonConvert.SerializeObject(msg.Payload)},Time:{DateTime.Now.ToString("yyyyy-MM-dd HH:mm:ss")}");
                 }, ct);
-                return true;
+                //return true;
+                return false;
             }, stoppingToken);
 
         }
