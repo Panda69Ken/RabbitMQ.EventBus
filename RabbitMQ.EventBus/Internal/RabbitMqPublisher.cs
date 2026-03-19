@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
+using Polly;
 using RabbitMQ.Client;
 using RabbitMQ.EventBus.Abstractions;
 using System.Text;
@@ -12,10 +13,12 @@ namespace RabbitMQ.EventBus.Internal
     /// <param name="connection"></param>
     public sealed class RabbitMqPublisher(
         IConnection connection,
-        ILogger<RabbitMqPublisher> logger) : IRabbitMqPublisher
+        ILogger<RabbitMqPublisher> logger,
+        IAsyncPolicy publishPolicy) : IRabbitMqPublisher
     {
         private readonly IConnection _connection = connection;
         private readonly ILogger<RabbitMqPublisher> _logger = logger;
+        private readonly IAsyncPolicy _publishPolicy = publishPolicy;
 
         public async Task PublishAsync<T>(
             string exchange,
@@ -29,44 +32,24 @@ namespace RabbitMQ.EventBus.Internal
                 return;
             }
 
-            int maxRetries = 3;
-            int attempt = 0;
-
-            while (true)
+            // 使用注入的 policy 执行发布逻辑（policy 负责重试/退避/日志）
+            await _publishPolicy.ExecuteAsync(async ct =>
             {
-                try
-                {
-                    await using var channel = await _connection.CreateChannelAsync(cancellationToken: cancellationToken);
+                await using var channel = await _connection.CreateChannelAsync(cancellationToken: ct);
 
-                    var body = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(message));
+                var body = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(message));
 
-                    var props = new BasicProperties { Persistent = true };
+                var props = new BasicProperties { Persistent = true };
 
-                    await channel.BasicPublishAsync(
-                        exchange: exchange,
-                        routingKey: routingKey,
-                        mandatory: false,
-                        basicProperties: props,
-                        body: body,
-                        cancellationToken: cancellationToken);
+                await channel.BasicPublishAsync(
+                    exchange: exchange,
+                    routingKey: routingKey,
+                    mandatory: false,
+                    basicProperties: props,
+                    body: body,
+                    cancellationToken: ct);
 
-                    //_logger.LogInformation($"Publish 成功: exchange={exchange}, routingKey={routingKey}");
-                    break;
-                }
-                catch (Exception ex)
-                {
-                    attempt++;
-                    if (attempt >= maxRetries)
-                    {
-                        _logger.LogError(ex, $"Publish 失败，超过最大重试次数: exchange={exchange}, routingKey={routingKey}");
-                        throw;
-                    }
-                    //指数退避延迟（例如 1s, 2s, 4s）
-                    TimeSpan delay = TimeSpan.FromSeconds(Math.Pow(2, attempt - 1));
-                    _logger.LogWarning(ex, $"Publish 失败，第 {attempt} 次重试 (等待 {delay.TotalSeconds}s)");
-                    await Task.Delay(delay, cancellationToken);
-                }
-            }
+            }, cancellationToken);
         }
     }
 }
